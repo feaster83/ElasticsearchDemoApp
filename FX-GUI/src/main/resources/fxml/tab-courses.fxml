@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane managed="true" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="demoapp.fx.course.controller.CourseTabController">
+    <top>
+        <FlowPane hgap="10.0">
+            <children>
+                <Label text="%tab.courses.label.search" />
+                <TextField prefWidth="300.0" />
+                <Button text="%tab.courses.button.search" />
+            </children>
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </padding>
+        </FlowPane>
+    </top>
+    <center>
+        <ScrollPane fitToHeight="true" fitToWidth="true">
+            <content>
+                <TableView fx:id="coursesTable">
+                    <columns>
+                        <TableColumn fx:id="nameColumn"  text="%tab.courses.table.column.name" />
+                        <TableColumn fx:id="priceColumn" text="%tab.courses.table.column.price" />
+                    </columns>
+               <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
+                </TableView>
+            </content>
+            <BorderPane.margin>
+                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </BorderPane.margin>
+        </ScrollPane>
+    </center>
+    <bottom>
+        <FlowPane alignment="CENTER_RIGHT">
+            <children>
+                <Button onAction="#openAddNewCourseDialog" text="%tab.courses.button.new" />
+            </children>
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </padding>
+        </FlowPane>
+    </bottom>
+</BorderPane>
