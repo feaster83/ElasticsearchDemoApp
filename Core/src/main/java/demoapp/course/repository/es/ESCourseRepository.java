@@ -5,6 +5,8 @@ import demoapp.RepositoryException;
 import demoapp.course.model.Course;
 import demoapp.course.repository.CourseRepository;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
+import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -15,9 +17,7 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 
-import static demoapp.Exceptions.ExceptionMessage.REPOSITORY_ADD_ITEM_FAILED;
-import static demoapp.Exceptions.ExceptionMessage.REPOSITORY_ADD_ITEM_FAILED_UNEXPECTED;
-import static demoapp.Exceptions.ExceptionMessage.REPOSITORY_RESOLVE_ITEMS_FAILED_UNEXPECTED;
+import static demoapp.Exceptions.ExceptionMessage.*;
 import static demoapp.Exceptions.getMessage;
 
 @Repository
@@ -38,41 +38,54 @@ public class ESCourseRepository implements CourseRepository {
 
         try {
             IndexResponse indexResponse = client.prepareIndex(INDEX, TYPE)
-                   .setSource(gson.toJson(esCourse))
-                   .execute()
-                   .actionGet();
+                    .setSource(gson.toJson(esCourse))
+                    .execute()
+                    .actionGet();
 
-           if (indexResponse.isCreated()) {
-               return getCourse(indexResponse.getId());
-           } else {
-               throw new RepositoryException(getMessage(REPOSITORY_ADD_ITEM_FAILED, course));
-           }
+            if (indexResponse.isCreated()) {
+                return getCourse(indexResponse.getId());
+            } else {
+                throw new RepositoryException(getMessage(REPOSITORY_ADD_ITEM_FAILED, course));
+            }
         } catch (ElasticsearchException e) {
             throw new RepositoryException(
-                    getMessage(REPOSITORY_ADD_ITEM_FAILED_UNEXPECTED, course, e.getLocalizedMessage()),
+                    getMessage(REPOSITORY_ADD_ITEM_FAILED_UNEXPECTED, course, e.getDetailedMessage()),
                     e.getRootCause());
         }
+    }
+
+    public boolean typeExists(String index, String type) {
+        boolean indexExist = client.admin().indices().exists(new IndicesExistsRequest(index)).actionGet().isExists();
+        boolean typeExist = false;
+        if (indexExist) {
+            String[] indexArray = new String[1];
+            indexArray[0] = INDEX;
+            typeExist = client.admin().indices().typesExists(new TypesExistsRequest(indexArray, type)).actionGet().isExists();
+        }
+        return typeExist;
     }
 
     @Override
     public List<Course> getCourses() {
         try {
-            SearchResponse searchResponse = client.prepareSearch(INDEX)
-                                                .setTypes(TYPE)
-                                                .setSize(Integer.MAX_VALUE)
-                                                .execute()
-                                                .actionGet();
-
             List<Course> returnList = new ArrayList<>();
-            searchResponse.getHits().forEach(hit -> {
-                ESCourse returnedCourse = gson.fromJson(hit.getSourceAsString(), ESCourse.class);
-                returnList.add(CourseMapper.toCourse(hit.getId(), returnedCourse));
-            });
+            if (typeExists(INDEX, TYPE)) {
 
+                SearchResponse searchResponse = client.prepareSearch(INDEX)
+                        .setTypes(TYPE)
+                        .setSize(Integer.MAX_VALUE)
+                        .execute()
+                        .actionGet();
+
+                searchResponse.getHits().forEach(hit -> {
+                    ESCourse returnedCourse = gson.fromJson(hit.getSourceAsString(), ESCourse.class);
+                    returnList.add(CourseMapper.toCourse(hit.getId(), returnedCourse));
+                });
+            }
             return returnList;
 
         } catch (ElasticsearchException e) {
-            throw new RepositoryException(getMessage(REPOSITORY_RESOLVE_ITEMS_FAILED_UNEXPECTED, e.getLocalizedMessage()),
+            throw new RepositoryException(getMessage(REPOSITORY_RESOLVE_ITEMS_FAILED_UNEXPECTED, e.getDetailedMessage()),
                     e.getRootCause());
         }
     }

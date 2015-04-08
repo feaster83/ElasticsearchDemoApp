@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>demoapp-fxgui</artifactId>
+    <artifactId>fx-gui</artifactId>
 
     <dependencies>
         <dependency>
@@ -25,6 +25,12 @@
             <groupId>org.rapidpm.modul</groupId>
             <artifactId>javafx-dialog</artifactId>
             <version>1.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jboss.arquillian.container</groupId>
+                    <artifactId>arquillian-weld-ee-embedded-1.1</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>

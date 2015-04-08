@@ -16,8 +16,8 @@
     </properties>
 
     <modules>
-        <module>FX-GUI</module>
-        <module>Core</module>
+        <module>core</module>
+        <module>fx-gui</module>
     </modules>
 
     <parent>
