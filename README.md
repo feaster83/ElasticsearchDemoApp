@@ -1,4 +1,9 @@
 # ElasticsearchDemoApp
-Demo application for my Elasticsearch / ELK stack presentation
+
+Demo application
+* JavaFX
+* SpringBoot
+* Elasticsearch
+* Swagger
 
 WORK IN PROGRESS!!
